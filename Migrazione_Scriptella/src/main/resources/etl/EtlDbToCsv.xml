@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE etl SYSTEM "http://scriptella.org/dtd/etl.dtd">
+<etl>
+    <!-- Connessione al database finale -->
+    <connection id="conDbFinale" driver="com.microsoft.sqlserver.jdbc.SQLServerDriver"
+                url="jdbc:sqlserver://10.6.1.111:1433;databaseName=DataSet;encrypt=false;trustServerCertificate=true;characterEncoding=UTF-8"
+                user="uScriptella" password="Sd3S7ljiy605g8vqPCAF">
+    </connection>
+    <connection id="csv_out" driver="csv" url="file:../file/output.csv">
+        <include href="../propertiesFile/DbToCsv.properties"/>
+    </connection>
+
+    <!-- Scrittura degli header nel file CSV -->
+    <connection driver="jexl" id="jexl">
+
+    </connection>
+    <script connection-id="csv_out">
+        Id_Ente, Denominazione, CF, PIva, Data_Istituzione, Data_Cessazione, Codice_ATECO, Descr_Codice_ATECO, Codice_Forma_Giuridica, Descr_Forma_Giuridica, Telefono, FAX, URL, Nome_Resp, Cogn_Resp, Titolo_Resp, Indirizzo, CAP, Codice_ISTAT_Comune, Codice_Comune, Dizione_Comune, Codice_Catastale, Codice_Provincia, Dizione_Provincia, Sigla_Provincia, Codice_Regione, Dizione_Regione, Codice_Zona, Dizione_zona, Stato_Partecipazione, Codice_Ente_SIOPE, Id_Tipologia_SIOPE, Codice_Tipologia_SIOPE, Descr_Tipologia_SIOPE, Data_Inclusione_SIOPE, Data_Esclusione_SIOPE, Codice_Ente_IPA, Id_Categoria_IPA, Codice_Categoria_IPA, Descr_Categoria_IPA, Codice_Tipologia_IPA, Descr_Tipologia_IPA, Data_Inclusione_IPA, Data_Esclusione_IPA, Codice_Ente_MIUR, Id_Tipologia_MIUR, Codice_Tipologia_MIUR, Descr_Tipologia_MIUR, Id_Tipologia_DT, Codice_Tipologia_DT, Descr_Tipologia_DT, Codice_Ente_SSN, Codice_Ente_ISTAT_S13, Id_Tipologia_ISTAT_S13, Codice_Tipologia_ISTAT_S13, Descr_Tipologia_ISTAT_S13, Data_Inclusione_ISTAT_S13, Data_Esclusione_ISTAT_S13, Id_Tipologia_DLGS_118_2011, Codice_Tipologia_DLGS_118_2011, Descr_Tipologia_DLGS_118_2011, Data_Inclusione_DLGS_118_2011, Data_Esclusione_DLGS_118_2011
+    </script>
+
+    <!-- Query per estrarre i dati e scriverli in un file CSV -->
+    <query connection-id="conDbFinale">
+        SELECT
+        COALESCE(CAST(Enti.Id_Ente AS VARCHAR), '') AS Id_Ente,
+        COALESCE(Enti.Denominazione, '') AS Denominazione,
+        COALESCE(Enti.CF, '') AS CF,
+        COALESCE(Enti.PIva, '') AS PIva,
+        COALESCE(CONVERT(VARCHAR, Enti.Data_Istituzione, 23), '') AS Data_Istituzione,
+        COALESCE(CONVERT(VARCHAR, Enti.Data_Cessazione, 23), '') AS Data_Cessazione,
+        COALESCE(Codici_ATECO.Codice_ATECO, '') AS Codice_ATECO,
+        COALESCE(Codici_ATECO.Descr_Codice_ATECO, '') AS Descr_Codice_ATECO,
+        COALESCE(Forme_Giuridiche.Codice_Forma_Giuridica, '') AS Codice_Forma_Giuridica,
+        COALESCE(Forme_Giuridiche.Descr_Forma_Giuridica, '') AS Descr_Forma_Giuridica,
+        COALESCE(Enti.Telefono, '') AS Telefono,
+        COALESCE(Enti.FAX, '') AS FAX,
+        COALESCE(Enti.URL, '') AS URL,
+        COALESCE(Enti.Nome_Resp, '') AS Nome_Resp,
+        COALESCE(Enti.Cogn_Resp, '') AS Cogn_Resp,
+        COALESCE(Enti.Titolo_Resp, '') AS Titolo_Resp,
+        COALESCE(Enti.Indirizzo, '') AS Indirizzo,
+        COALESCE(Enti.CAP, '') AS CAP,
+        COALESCE(Comuni.Codice_ISTAT_Comune, '') AS Codice_ISTAT_Comune,
+        COALESCE(Comuni.Codice_Comune, '') AS Codice_Comune,
+        COALESCE(Comuni.Dizione_Comune, '') AS Dizione_Comune,
+        COALESCE(Comuni.Codice_Catastale, '') AS Codice_Catastale,
+        COALESCE(Province.Codice_Provincia, '') AS Codice_Provincia,
+        COALESCE(Province.Dizione_Provincia, '') AS Dizione_Provincia,
+        COALESCE(Province.Sigla_Provincia, '') AS Sigla_Provincia,
+        COALESCE(Regioni.Codice_Regione, '') AS Codice_Regione,
+        COALESCE(Regioni.Dizione_Regione, '') AS Dizione_Regione,
+        COALESCE(Zone.Codice_Zona, '') AS Codice_Zona,
+        COALESCE(Zone.Dizione_zona, '') AS Dizione_zona,
+        COALESCE(Enti.Stato_Partecipazione, '') AS Stato_Partecipazione,
+        COALESCE(Enti.Codice_Ente_SIOPE, '') AS Codice_Ente_SIOPE,
+        COALESCE(Tipologie_SIOPE.Id_Tipologia_SIOPE, '') AS Id_Tipologia_SIOPE,
+        COALESCE(Tipologie_SIOPE.Codice_Tipologia_SIOPE, '') AS Codice_Tipologia_SIOPE,
+        COALESCE(Tipologie_SIOPE.Descr_Tipologia_SIOPE, '') AS Descr_Tipologia_SIOPE,
+        COALESCE(CONVERT(VARCHAR, Enti.Data_Inclusione_SIOPE, 23), '') AS Data_Inclusione_SIOPE,
+        COALESCE(CONVERT(VARCHAR, Enti.Data_Esclusione_SIOPE, 23), '') AS Data_Esclusione_SIOPE,
+        COALESCE(Enti.Codice_Ente_IPA, '') AS Codice_Ente_IPA,
+        COALESCE(Tipologie_IPA.Id_Categoria_IPA, '') AS Id_Categoria_IPA,
+        COALESCE(Tipologie_IPA.Codice_Categoria_IPA, '') AS Codice_Categoria_IPA,
+        COALESCE(Tipologie_IPA.Descr_Categoria_IPA, '') AS Descr_Categoria_IPA,
+        COALESCE(Tipologie_IPA.Codice_Tipologia_IPA, '') AS Codice_Tipologia_IPA,
+        COALESCE(Tipologie_IPA.Descr_Tipologia_IPA, '') AS Descr_Tipologia_IPA,
+        COALESCE(CONVERT(VARCHAR, Enti.Data_Inclusione_IPA, 23), '') AS Data_Inclusione_IPA,
+        COALESCE(CONVERT(VARCHAR, Enti.Data_Esclusione_IPA, 23), '') AS Data_Esclusione_IPA,
+        COALESCE(Enti.Codice_Ente_MIUR, '') AS Codice_Ente_MIUR,
+        COALESCE(Tipologie_MIUR.Id_Tipologia_MIUR, '') AS Id_Tipologia_MIUR,
+        COALESCE(Tipologie_MIUR.Codice_Tipologia_MIUR, '') AS Codice_Tipologia_MIUR,
+        COALESCE(Tipologie_MIUR.Descr_Tipologia_MIUR, '') AS Descr_Tipologia_MIUR,
+        COALESCE(Tipologie_DT.Id_Tipologia_DT, '') AS Id_Tipologia_DT,
+        COALESCE(Tipologie_DT.Codice_Tipologia_DT, '') AS Codice_Tipologia_DT,
+        COALESCE(Tipologie_DT.Descr_Tipologia_DT, '') AS Descr_Tipologia_DT,
+        COALESCE(Enti.Codice_Ente_SSN, '') AS Codice_Ente_SSN,
+        COALESCE(Enti.Codice_Ente_ISTAT_S13, '') AS Codice_Ente_ISTAT_S13,
+        COALESCE(Tipologie_ISTAT.Id_Tipologia_ISTAT_S13, '') AS Id_Tipologia_ISTAT_S13,
+        COALESCE(Tipologie_ISTAT.Codice_Tipologia_ISTAT_S13, '') AS Codice_Tipologia_ISTAT_S13,
+        COALESCE(Tipologie_ISTAT.Descr_Tipologia_ISTAT_S13, '') AS Descr_Tipologia_ISTAT_S13,
+        COALESCE(CONVERT(VARCHAR, Enti.Data_Inclusione_ISTAT_S13, 23), '') AS Data_Inclusione_ISTAT_S13,
+        COALESCE(CONVERT(VARCHAR, Enti.Data_Esclusione_ISTAT_S13, 23), '') AS Data_Esclusione_ISTAT_S13,
+        COALESCE(Tipologie_DLGS_118_2011.Id_Tipologia_DLGS_118_2011, '') AS Id_Tipologia_DLGS_118_2011,
+        COALESCE(Tipologie_DLGS_118_2011.Codice_Tipologia_DLGS_118_2011, '') AS Codice_Tipologia_DLGS_118_2011,
+        COALESCE(Tipologie_DLGS_118_2011.Descr_Tipologia_DLGS_118_2011, '') AS Descr_Tipologia_DLGS_118_2011,
+        COALESCE(CONVERT(VARCHAR, Enti.Data_Inclusione_DLGS_118_2011, 23), '') AS Data_Inclusione_DLGS_118_2011,
+        COALESCE(CONVERT(VARCHAR, Enti.Data_Esclusione_DLGS_118_2011, 23), '') AS Data_Esclusione_DLGS_118_2011
+        FROM
+        dbo.Enti
+        LEFT JOIN dbo.Codici_ATECO ON dbo.Enti.Id_ATECO = dbo.Codici_ATECO.Id_ATECO
+        LEFT JOIN dbo.Forme_Giuridiche ON dbo.Enti.Id_Forma_Giuridica = dbo.Forme_Giuridiche.Id_Forma_Giuridica
+        LEFT JOIN dbo.Comuni ON dbo.Enti.Id_Comune = dbo.Comuni.Id_Comune
+        LEFT JOIN dbo.Regioni ON dbo.Enti.Id_Regione = dbo.Regioni.Id_Regione
+        LEFT JOIN dbo.Province ON dbo.Enti.Id_Provincia = dbo.Province.Id_Provincia
+        LEFT JOIN dbo.Zone ON dbo.Enti.Id_Zona = dbo.Zone.Id_Zona
+        LEFT JOIN dbo.Tipologie_SIOPE ON dbo.Enti.Id_SIOPE = dbo.Tipologie_SIOPE.Id_SIOPE
+        LEFT JOIN dbo.Tipologie_IPA ON dbo.Enti.Id_IPA = dbo.Tipologie_IPA.Id_IPA
+        LEFT JOIN dbo.Tipologie_MIUR ON dbo.Enti.Id_MIUR = dbo.Tipologie_MIUR.Id_MIUR
+        LEFT JOIN dbo.Tipologie_DT ON dbo.Enti.Id_DT = dbo.Tipologie_DT.Id_DT
+        LEFT JOIN dbo.Tipologie_ISTAT ON dbo.Enti.Id_ISTAT = dbo.Tipologie_ISTAT.Id_ISTAT
+        LEFT JOIN dbo.Tipologie_DLGS_118_2011 ON dbo.Enti.Id_DLGS = dbo.Tipologie_DLGS_118_2011.Id_DLGS
+        ORDER BY
+        Id_Ente;
+
+
+        <script connection-id="csv_out">
+            ${Id_Ente}, ${Denominazione}, ${CF}, ${PIva}, ${Data_Istituzione}, ${Data_Cessazione}, ${Codice_ATECO}, ${Descr_Codice_ATECO}, ${Codice_Forma_Giuridica}, ${Descr_Forma_Giuridica}, ${Telefono}, ${FAX}, ${URL}, ${Nome_Resp}, ${Cogn_Resp}, ${Titolo_Resp}, ${Indirizzo}, ${CAP}, ${Codice_ISTAT_Comune}, ${Codice_Comune}, ${Dizione_Comune}, ${Codice_Catastale}, ${Codice_Provincia}, ${Dizione_Provincia}, ${Sigla_Provincia}, ${Codice_Regione}, ${Dizione_Regione}, ${Codice_Zona}, ${Dizione_zona}, ${Stato_Partecipazione}, ${Codice_Ente_SIOPE}, ${Id_Tipologia_SIOPE}, ${Codice_Tipologia_SIOPE}, ${Descr_Tipologia_SIOPE}, ${Data_Inclusione_SIOPE}, ${Data_Esclusione_SIOPE}, ${Codice_Ente_IPA}, ${Id_Categoria_IPA}, ${Codice_Categoria_IPA}, ${Descr_Categoria_IPA}, ${Codice_Tipologia_IPA}, ${Descr_Tipologia_IPA}, ${Data_Inclusione_IPA}, ${Data_Esclusione_IPA}, ${Codice_Ente_MIUR}, ${Id_Tipologia_MIUR}, ${Codice_Tipologia_MIUR}, ${Descr_Tipologia_MIUR}, ${Id_Tipologia_DT}, ${Codice_Tipologia_DT}, ${Descr_Tipologia_DT}, ${Codice_Ente_SSN}, ${Codice_Ente_ISTAT_S13}, ${Id_Tipologia_ISTAT_S13}, ${Codice_Tipologia_ISTAT_S13}, ${Descr_Tipologia_ISTAT_S13}, ${Data_Inclusione_ISTAT_S13}, ${Data_Esclusione_ISTAT_S13}, ${Id_Tipologia_DLGS_118_2011}, ${Codice_Tipologia_DLGS_118_2011}, ${Descr_Tipologia_DLGS_118_2011}, ${Data_Inclusione_DLGS_118_2011}, ${Data_Esclusione_DLGS_118_2011}
+
+        </script>
+    </query>
+</etl>

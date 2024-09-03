@@ -1,0 +1,429 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE etl SYSTEM "http://scriptella.org/dtd/etl.dtd">
+<etl>
+
+    <!-- Connessione al DBSQL -->
+    <connection id="conDbFinale" driver="com.microsoft.sqlserver.jdbc.SQLServerDriver" url="jdbc:sqlserver://10.6.1.111:1433;databaseName=DataSet;encrypt=false;trustServerCertificate=true" user="uScriptella" password="Sd3S7ljiy605g8vqPCAF"/>
+
+    <!-- Connessione al file CSV -->
+    <connection id="csv_in" driver="csv" url="file:../file/Anagrafe-Enti---Ente.csv">
+        <include href="../propertiesFile/csv.properties"/>
+    </connection>
+
+    <!-- Creazione delle tabelle nel database SQL Server -->
+    <script connection-id="conDbFinale">
+        DROP TABLE IF EXISTS Enti;
+        DROP TABLE IF EXISTS Comuni;
+        DROP TABLE IF EXISTS Province;
+        DROP TABLE IF EXISTS Regioni;
+        DROP TABLE IF EXISTS Zone;
+        DROP TABLE IF EXISTS Tipologie_SIOPE;
+        DROP TABLE IF EXISTS Tipologie_IPA;
+        DROP TABLE IF EXISTS Tipologie_MIUR;
+        DROP TABLE IF EXISTS Tipologie_DT;
+        DROP TABLE IF EXISTS Tipologie_ISTAT;
+        DROP TABLE IF EXISTS Tipologie_DLGS_118_2011;
+        DROP TABLE IF EXISTS Codici_ATECO;
+        DROP TABLE IF EXISTS Forme_Giuridiche;
+
+        CREATE TABLE Codici_ATECO (
+        Id_ATECO BIGINT IDENTITY(1,1) PRIMARY KEY,
+        Codice_ATECO NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL CHECK (LTRIM(RTRIM(Codice_ATECO)) != ''),
+        Descr_Codice_ATECO NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL CHECK (LTRIM(RTRIM(Descr_Codice_ATECO)) != '')
+        );
+
+        CREATE TABLE Forme_Giuridiche (
+        Id_Forma_Giuridica BIGINT IDENTITY(1,1) PRIMARY KEY,
+        Codice_Forma_Giuridica NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL CHECK (LTRIM(RTRIM(Codice_Forma_Giuridica)) != ''),
+        Descr_Forma_Giuridica NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL CHECK (LTRIM(RTRIM(Descr_Forma_Giuridica)) != '')
+        );
+
+        CREATE TABLE Zone (
+        Id_Zona BIGINT IDENTITY(1,1) PRIMARY KEY,
+        Codice_Zona NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL CHECK (LTRIM(RTRIM(Codice_Zona)) != ''),
+        Dizione_Zona NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL CHECK (LTRIM(RTRIM(Dizione_Zona)) != '')
+        );
+
+        CREATE TABLE Regioni (
+        Id_Regione BIGINT IDENTITY(1,1) PRIMARY KEY,
+        Codice_Regione NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL CHECK (LTRIM(RTRIM(Codice_Regione)) != ''),
+        Dizione_Regione NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL CHECK (LTRIM(RTRIM(Dizione_Regione)) != '')
+        );
+
+        CREATE TABLE Province (
+        Id_Provincia BIGINT IDENTITY(1,1) PRIMARY KEY,
+        Codice_Provincia NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL CHECK (LTRIM(RTRIM(Codice_Provincia)) != ''),
+        Dizione_Provincia NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL CHECK (LTRIM(RTRIM(Dizione_Provincia)) != ''),
+        Sigla_Provincia NVARCHAR(10) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL CHECK (LTRIM(RTRIM(Sigla_Provincia)) != '')
+        );
+
+        CREATE TABLE Comuni (
+        Id_Comune BIGINT IDENTITY(1,1) PRIMARY KEY,
+        Codice_ISTAT_Comune NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL CHECK (LTRIM(RTRIM(Codice_ISTAT_Comune)) != ''),
+        Codice_Comune NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL CHECK (LTRIM(RTRIM(Codice_Comune)) != ''),
+        Dizione_Comune NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL CHECK (LTRIM(RTRIM(Dizione_Comune)) != ''),
+        Codice_Catastale NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL CHECK (LTRIM(RTRIM(Codice_Catastale)) != ''),
+        Codice_Provincia NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL CHECK (LTRIM(RTRIM(Codice_Provincia)) != ''),
+        Codice_Regione NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL CHECK (LTRIM(RTRIM(Codice_Regione)) != ''),
+        Codice_Zona NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL CHECK (LTRIM(RTRIM(Codice_Zona)) != ''),
+        Id_Provincia BIGINT,
+        Id_Regione BIGINT,
+        Id_Zona BIGINT,
+        FOREIGN KEY (Id_Provincia) REFERENCES Province(Id_Provincia),
+        FOREIGN KEY (Id_Regione) REFERENCES Regioni(Id_Regione),
+        FOREIGN KEY (Id_Zona) REFERENCES Zone(Id_Zona),
+        CONSTRAINT Dizione UNIQUE (Dizione_Comune)
+        );
+
+        CREATE TABLE Tipologie_SIOPE (
+        Id_SIOPE BIGINT IDENTITY(1,1) PRIMARY KEY,
+        Id_Tipologia_SIOPE NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL CHECK (LTRIM(RTRIM(Id_Tipologia_SIOPE)) != ''),
+        Codice_Tipologia_SIOPE NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL CHECK (LTRIM(RTRIM(Codice_Tipologia_SIOPE)) != ''),
+        Descr_Tipologia_SIOPE NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL CHECK (LTRIM(RTRIM(Descr_Tipologia_SIOPE)) != '')
+        );
+
+        CREATE TABLE Tipologie_IPA (
+        Id_IPA BIGINT IDENTITY(1,1) PRIMARY KEY,
+        Id_Categoria_IPA NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL CHECK (LTRIM(RTRIM(Id_Categoria_IPA)) != ''),
+        Codice_Categoria_IPA NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL CHECK (LTRIM(RTRIM(Codice_Categoria_IPA)) != ''),
+        Descr_Categoria_IPA NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL CHECK (LTRIM(RTRIM(Descr_Categoria_IPA)) != ''),
+        Codice_Tipologia_IPA NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL CHECK (LTRIM(RTRIM(Codice_Tipologia_IPA)) != ''),
+        Descr_Tipologia_IPA NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL CHECK (LTRIM(RTRIM(Descr_Tipologia_IPA)) != '')
+        );
+
+        CREATE TABLE Tipologie_MIUR (
+        Id_MIUR BIGINT IDENTITY(1,1) PRIMARY KEY,
+        Id_Tipologia_MIUR NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL CHECK (LTRIM(RTRIM(Id_Tipologia_MIUR)) != ''),
+        Codice_Tipologia_MIUR NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL CHECK (LTRIM(RTRIM(Codice_Tipologia_MIUR)) != ''),
+        Descr_Tipologia_MIUR NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL CHECK (LTRIM(RTRIM(Descr_Tipologia_MIUR)) != '')
+        );
+
+        CREATE TABLE Tipologie_DT (
+        Id_DT BIGINT IDENTITY(1,1) PRIMARY KEY,
+        Id_Tipologia_DT NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL CHECK (LTRIM(RTRIM(Id_Tipologia_DT)) != ''),
+        Codice_Tipologia_DT NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL CHECK (LTRIM(RTRIM(Codice_Tipologia_DT)) != ''),
+        Descr_Tipologia_DT NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL CHECK (LTRIM(RTRIM(Descr_Tipologia_DT)) != '')
+        );
+
+        CREATE TABLE Tipologie_ISTAT (
+        Id_ISTAT BIGINT IDENTITY(1,1) PRIMARY KEY,
+        Id_Tipologia_ISTAT_S13 NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL CHECK (LTRIM(RTRIM(Id_Tipologia_ISTAT_S13)) != ''),
+        Codice_Tipologia_ISTAT_S13 NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL CHECK (LTRIM(RTRIM(Codice_Tipologia_ISTAT_S13)) != ''),
+        Descr_Tipologia_ISTAT_S13 NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL CHECK (LTRIM(RTRIM(Descr_Tipologia_ISTAT_S13)) != '')
+        );
+
+        CREATE TABLE Tipologie_DLGS_118_2011 (
+        Id_DLGS BIGINT IDENTITY(1,1) PRIMARY KEY,
+        Id_Tipologia_DLGS_118_2011 NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL CHECK (LTRIM(RTRIM(Id_Tipologia_DLGS_118_2011)) != ''),
+        Codice_Tipologia_DLGS_118_2011 NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL CHECK (LTRIM(RTRIM(Codice_Tipologia_DLGS_118_2011)) != ''),
+        Descr_Tipologia_DLGS_118_2011 NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL CHECK (LTRIM(RTRIM(Descr_Tipologia_DLGS_118_2011)) != '')
+        );
+
+        CREATE TABLE Enti (
+        Id_Ente NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS PRIMARY KEY,
+        Codice_Ente_SSN NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS,
+        Codice_Ente_SIOPE NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS,
+        Codice_Ente_IPA NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS,
+        Codice_Ente_MIUR NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS,
+        Codice_Ente_ISTAT_S13 NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS,
+        Denominazione NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS,
+        CF NVARCHAR(16) COLLATE SQL_Latin1_General_CP1_CI_AS,
+        PIva NVARCHAR(11) COLLATE SQL_Latin1_General_CP1_CI_AS,
+        Telefono NVARCHAR(20) COLLATE SQL_Latin1_General_CP1_CI_AS,
+        FAX NVARCHAR(20) COLLATE SQL_Latin1_General_CP1_CI_AS,
+        URL NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS,
+        Nome_Resp NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS,
+        Cogn_Resp NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS,
+        Titolo_Resp NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS,
+        Indirizzo NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS,
+        CAP NVARCHAR(10) COLLATE SQL_Latin1_General_CP1_CI_AS,
+        Stato_Partecipazione NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS,
+        Data_Istituzione DATE,
+        Data_Cessazione DATE,
+        Data_Inclusione_DLGS_118_2011 DATE,
+        Data_Esclusione_DLGS_118_2011 DATE,
+        Data_Inclusione_ISTAT_S13 DATE,
+        Data_Esclusione_ISTAT_S13 DATE,
+        Data_Inclusione_IPA DATE,
+        Data_Esclusione_IPA DATE,
+        Data_Inclusione_SIOPE DATE,
+        Data_Esclusione_SIOPE DATE,
+        Codice_ATECO NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS,
+        Codice_Forma_Giuridica NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS,
+        Dizione_Comune NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS,
+        Codice_Provincia NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS,
+        Codice_Regione NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS,
+        Codice_Zona NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS,
+        Id_Tipologia_SIOPE NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS,
+        Id_Categoria_IPA NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS,
+        Id_Tipologia_MIUR NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS,
+        Id_Tipologia_DT NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS,
+        Id_Tipologia_ISTAT_S13 NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS,
+        Id_Tipologia_DLGS_118_2011 NVARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS,
+        Id_ATECO BIGINT,
+        Id_Forma_Giuridica BIGINT,
+        Id_Comune BIGINT,
+        Id_Provincia BIGINT,
+        Id_Regione BIGINT,
+        Id_Zona BIGINT,
+        Id_DT BIGINT,
+        Id_SIOPE BIGINT,
+        Id_IPA BIGINT,
+        Id_MIUR BIGINT,
+        Id_ISTAT BIGINT,
+        Id_DLGS BIGINT,
+        FOREIGN KEY (Id_ATECO) REFERENCES Codici_ATECO(Id_ATECO),
+        FOREIGN KEY (Id_Forma_Giuridica) REFERENCES Forme_Giuridiche(Id_Forma_Giuridica),
+        FOREIGN KEY (Id_Comune) REFERENCES Comuni(Id_Comune),
+        FOREIGN KEY (Id_Provincia) REFERENCES Province(Id_Provincia),
+        FOREIGN KEY (Id_Regione) REFERENCES Regioni(Id_Regione),
+        FOREIGN KEY (Id_Zona) REFERENCES Zone(Id_Zona),
+        FOREIGN KEY (Id_DT) REFERENCES Tipologie_DT(Id_DT),
+        FOREIGN KEY (Id_SIOPE) REFERENCES Tipologie_SIOPE(Id_SIOPE),
+        FOREIGN KEY (Id_IPA) REFERENCES Tipologie_IPA(Id_IPA),
+        FOREIGN KEY (Id_MIUR) REFERENCES Tipologie_MIUR(Id_MIUR),
+        FOREIGN KEY (Id_ISTAT) REFERENCES Tipologie_ISTAT(Id_ISTAT),
+        FOREIGN KEY (Id_DLGS) REFERENCES Tipologie_DLGS_118_2011(Id_DLGS)
+        );
+
+    </script>
+
+    <!-- Inserimento dei dati dal CSV nelle tabelle normalizzate -->
+    <query connection-id="csv_in">
+    <script connection-id="conDbFinale">
+        IF NOT EXISTS (
+        SELECT 1 FROM dbo.Codici_ATECO
+        WHERE Codice_ATECO = ?Codice_ATECO
+        AND Descr_Codice_ATECO = ?Descr_Codice_ATECO
+        )
+        AND ?Codice_ATECO IS NOT NULL AND LEN(?Codice_ATECO) > 0
+        AND ?Descr_Codice_ATECO IS NOT NULL AND LEN(?Descr_Codice_ATECO) > 0
+        INSERT INTO dbo.Codici_ATECO (Codice_ATECO, Descr_Codice_ATECO) VALUES (?Codice_ATECO, ?Descr_Codice_ATECO);
+    </script>
+    <script connection-id="conDbFinale">
+        IF NOT EXISTS (
+        SELECT 1 FROM dbo.Forme_Giuridiche
+        WHERE Codice_Forma_Giuridica = ?Codice_Forma_Giuridica
+        AND Descr_Forma_Giuridica = ?Descr_Forma_Giuridica
+        )
+        AND ?Codice_Forma_Giuridica IS NOT NULL AND LEN(?Codice_Forma_Giuridica) > 0
+        AND ?Descr_Forma_Giuridica IS NOT NULL AND LEN(?Descr_Forma_Giuridica) > 0
+        INSERT INTO dbo.Forme_Giuridiche (Codice_Forma_Giuridica, Descr_Forma_Giuridica) VALUES (?Codice_Forma_Giuridica, ?Descr_Forma_Giuridica);
+    </script>
+
+    <script connection-id="conDbFinale">
+        IF NOT EXISTS (
+        SELECT 1 FROM dbo.Zone
+        WHERE Codice_Zona = ?Codice_Zona
+        AND Dizione_Zona = ?Dizione_Zona
+        )
+        AND ?Codice_Zona IS NOT NULL AND LEN(?Codice_Zona) > 0
+        AND ?Dizione_Zona IS NOT NULL AND LEN(?Dizione_Zona) > 0
+        INSERT INTO dbo.Zone (Codice_Zona, Dizione_Zona) VALUES (?Codice_Zona, ?Dizione_Zona);
+    </script>
+
+
+    <script connection-id="conDbFinale">
+        IF NOT EXISTS (
+        SELECT 1 FROM dbo.Regioni
+        WHERE Codice_Regione = ?Codice_Regione
+        AND Dizione_Regione = ?Dizione_Regione
+        )
+        AND ?Codice_Regione IS NOT NULL AND LEN(?Codice_Regione) > 0
+        AND ?Dizione_Regione IS NOT NULL AND LEN(?Dizione_Regione) > 0
+        INSERT INTO dbo.Regioni (Codice_Regione, Dizione_Regione) VALUES (?Codice_Regione, ?Dizione_Regione);
+    </script>
+
+    <script connection-id="conDbFinale">
+        IF NOT EXISTS (
+        SELECT 1 FROM dbo.Province
+        WHERE Codice_Provincia = ?Codice_Provincia
+        AND Dizione_Provincia = ?Dizione_Provincia
+        AND Sigla_Provincia = ?Sigla_Provincia
+        )
+        AND ?Codice_Provincia IS NOT NULL AND LEN(?Codice_Provincia) > 0
+        AND ?Dizione_Provincia IS NOT NULL AND LEN(?Dizione_Provincia) > 0
+        AND ?Sigla_Provincia IS NOT NULL AND LEN(?Sigla_Provincia) > 0
+        INSERT INTO dbo.Province (Codice_Provincia, Dizione_Provincia, Sigla_Provincia) VALUES (?Codice_Provincia, ?Dizione_Provincia, ?Sigla_Provincia);
+    </script>
+
+
+    <script connection-id="conDbFinale">
+        IF NOT EXISTS (
+        SELECT 1 FROM dbo.Comuni
+        WHERE TRIM(Dizione_Comune) = TRIM(?Dizione_Comune)
+        )
+        AND ?Dizione_Comune IS NOT NULL AND LEN(?Dizione_Comune) > 0
+        INSERT INTO dbo.Comuni (
+        Codice_ISTAT_Comune, Codice_Comune, Dizione_Comune, Codice_Catastale,
+        Codice_Provincia, Codice_Regione, Codice_Zona
+        ) VALUES (
+        ?Codice_ISTAT_Comune, ?Codice_Comune, ?Dizione_Comune, ?Codice_Catastale,
+        ?Codice_Provincia, ?Codice_Regione, ?Codice_Zona
+        );
+    </script>
+
+    <script connection-id="conDbFinale">
+        IF NOT EXISTS (
+        SELECT 1 FROM dbo.Tipologie_SIOPE
+        WHERE Id_Tipologia_SIOPE = ?Id_Tipologia_SIOPE
+        )
+        AND ?Id_Tipologia_SIOPE IS NOT NULL AND LEN(?Id_Tipologia_SIOPE) > 0
+        INSERT INTO dbo.Tipologie_SIOPE (Id_Tipologia_SIOPE, Codice_Tipologia_SIOPE, Descr_Tipologia_SIOPE) VALUES (?Id_Tipologia_SIOPE, ?Codice_Tipologia_SIOPE, ?Descr_Tipologia_SIOPE);
+    </script>
+
+    <script connection-id="conDbFinale">
+        IF NOT EXISTS (
+        SELECT 1 FROM dbo.Tipologie_IPA
+        WHERE Id_Categoria_IPA = ?Id_Categoria_IPA
+        AND Codice_Categoria_IPA = ?Codice_Categoria_IPA
+        AND Codice_Tipologia_IPA = ?Codice_Tipologia_IPA
+        )
+        AND ?Id_Categoria_IPA IS NOT NULL AND LEN(?Id_Categoria_IPA) > 0
+        AND ?Codice_Categoria_IPA IS NOT NULL AND LEN(?Codice_Categoria_IPA) > 0
+        AND ?Codice_Tipologia_IPA IS NOT NULL AND LEN(?Codice_Tipologia_IPA) > 0
+        INSERT INTO dbo.Tipologie_IPA (Id_Categoria_IPA, Codice_Categoria_IPA, Descr_Categoria_IPA, Codice_Tipologia_IPA, Descr_Tipologia_IPA) VALUES (?Id_Categoria_IPA, ?Codice_Categoria_IPA, ?Descr_Categoria_IPA, ?Codice_Tipologia_IPA, ?Descr_Tipologia_IPA);
+    </script>
+
+    <script connection-id="conDbFinale">
+        IF NOT EXISTS (
+        SELECT 1 FROM dbo.Tipologie_MIUR
+        WHERE Id_Tipologia_MIUR = ?Id_Tipologia_MIUR
+        )
+        AND ?Id_Tipologia_MIUR IS NOT NULL AND LEN(?Id_Tipologia_MIUR) > 0
+        INSERT INTO dbo.Tipologie_MIUR (Id_Tipologia_MIUR, Codice_Tipologia_MIUR, Descr_Tipologia_MIUR) VALUES (?Id_Tipologia_MIUR, ?Codice_Tipologia_MIUR, ?Descr_Tipologia_MIUR);
+    </script>
+
+    <script connection-id="conDbFinale">
+        IF NOT EXISTS (
+        SELECT 1 FROM dbo.Tipologie_DT
+        WHERE Id_Tipologia_DT = ?Id_Tipologia_DT
+        )
+        AND ?Id_Tipologia_DT IS NOT NULL AND LEN(?Id_Tipologia_DT) > 0
+        INSERT INTO dbo.Tipologie_DT (Id_Tipologia_DT, Codice_Tipologia_DT, Descr_Tipologia_DT) VALUES (?Id_Tipologia_DT, ?Codice_Tipologia_DT, ?Descr_Tipologia_DT);
+    </script>
+
+    <script connection-id="conDbFinale">
+        IF NOT EXISTS (
+        SELECT 1 FROM dbo.Tipologie_ISTAT
+        WHERE Id_Tipologia_ISTAT_S13 = ?Id_Tipologia_ISTAT_S13
+        )
+        AND ?Id_Tipologia_ISTAT_S13 IS NOT NULL AND LEN(?Id_Tipologia_ISTAT_S13) > 0
+        INSERT INTO dbo.Tipologie_ISTAT (Id_Tipologia_ISTAT_S13, Codice_Tipologia_ISTAT_S13, Descr_Tipologia_ISTAT_S13) VALUES (?Id_Tipologia_ISTAT_S13, ?Codice_Tipologia_ISTAT_S13, ?Descr_Tipologia_ISTAT_S13);
+    </script>
+
+    <script connection-id="conDbFinale">
+        IF NOT EXISTS (
+        SELECT 1 FROM dbo.Tipologie_DLGS_118_2011
+        WHERE Id_Tipologia_DLGS_118_2011 = ?Id_Tipologia_DLGS_118_2011
+        )
+        AND ?Id_Tipologia_DLGS_118_2011 IS NOT NULL AND LEN(?Id_Tipologia_DLGS_118_2011) > 0
+        INSERT INTO dbo.Tipologie_DLGS_118_2011 (Id_Tipologia_DLGS_118_2011, Codice_Tipologia_DLGS_118_2011, Descr_Tipologia_DLGS_118_2011) VALUES (?Id_Tipologia_DLGS_118_2011, ?Codice_Tipologia_DLGS_118_2011, ?Descr_Tipologia_DLGS_118_2011);
+    </script>
+
+    <script connection-id="conDbFinale">
+        INSERT INTO dbo.Enti (
+        Id_Ente, Codice_Ente_SSN, Codice_Ente_SIOPE, Codice_Ente_IPA,
+        Codice_Ente_MIUR, Codice_Ente_ISTAT_S13, Denominazione, CF,
+        PIva, Telefono, FAX, URL, Nome_Resp, Cogn_Resp, Titolo_Resp,
+        Indirizzo, CAP, Stato_Partecipazione, Data_Istituzione,
+        Data_Cessazione, Data_Inclusione_DLGS_118_2011,
+        Data_Esclusione_DLGS_118_2011, Data_Inclusione_ISTAT_S13,
+        Data_Esclusione_ISTAT_S13, Data_Inclusione_IPA, Data_Esclusione_IPA,
+        Data_Inclusione_SIOPE, Data_Esclusione_SIOPE, Codice_ATECO,
+        Codice_Forma_Giuridica, Dizione_Comune, Codice_Provincia,
+        Codice_Regione, Codice_Zona, Id_Tipologia_SIOPE, Id_Categoria_IPA,
+        Id_Tipologia_MIUR, Id_Tipologia_DT, Id_Tipologia_ISTAT_S13,
+        Id_Tipologia_DLGS_118_2011
+        ) VALUES (
+        NULLIF(?Id_Ente, ''), NULLIF(?Codice_Ente_SSN, ''), NULLIF(?Codice_Ente_SIOPE, ''), NULLIF(?Codice_Ente_IPA, ''),
+        NULLIF(?Codice_Ente_MIUR, ''), NULLIF(?Codice_Ente_ISTAT_S13, ''), NULLIF(?Denominazione, ''), NULLIF(?CF, ''),
+        NULLIF(?PIva, ''), NULLIF(?Telefono, ''), NULLIF(?FAX, ''), NULLIF(?URL, ''), NULLIF(?Nome_Resp, ''), NULLIF(?Cogn_Resp, ''), NULLIF(?Titolo_Resp, ''),
+        NULLIF(?Indirizzo, ''), NULLIF(?CAP, ''), NULLIF(?Stato_Partecipazione, ''), NULLIF(?Data_Istituzione, ''),
+        NULLIF(?Data_Cessazione, ''), NULLIF(?Data_Inclusione_DLGS_118_2011, ''), NULLIF(?Data_Esclusione_DLGS_118_2011, ''), NULLIF(?Data_Inclusione_ISTAT_S13, ''),
+        NULLIF(?Data_Esclusione_ISTAT_S13, ''), NULLIF(?Data_Inclusione_IPA, ''), NULLIF(?Data_Esclusione_IPA, ''), NULLIF(?Data_Inclusione_SIOPE, ''), NULLIF(?Data_Esclusione_SIOPE, ''),
+        NULLIF(?Codice_ATECO, ''), NULLIF(?Codice_Forma_Giuridica, ''), NULLIF(?Dizione_Comune, ''), NULLIF(?Codice_Provincia, ''), NULLIF(?Codice_Regione, ''), NULLIF(?Codice_Zona, ''),
+        NULLIF(?Id_Tipologia_SIOPE, ''), NULLIF(?Id_Categoria_IPA, ''), NULLIF(?Id_Tipologia_MIUR, ''), NULLIF(?Id_Tipologia_DT, ''), NULLIF(?Id_Tipologia_ISTAT_S13, ''),
+        NULLIF(?Id_Tipologia_DLGS_118_2011, '')
+        );
+    </script>
+    </query>
+    <script connection-id="conDbFinale">
+        -- Aggiorna Id_Provincia
+        UPDATE dbo.Comuni
+        SET Id_Provincia = (SELECT Id_Provincia FROM dbo.Province WHERE Codice_Provincia = Comuni.Codice_Provincia)
+        WHERE Id_Provincia IS NULL;
+
+        -- Aggiorna Id_Regione
+        UPDATE dbo.Comuni
+        SET Id_Regione = (SELECT Id_Regione FROM dbo.Regioni WHERE Codice_Regione = Comuni.Codice_Regione)
+        WHERE Id_Regione IS NULL;
+
+        -- Aggiorna Id_Zona
+        UPDATE dbo.Comuni
+        SET Id_Zona = (SELECT Id_Zona FROM dbo.Zone WHERE Codice_Zona = Comuni.Codice_Zona)
+        WHERE Id_Zona IS NULL;
+
+    </script>
+    <script connection-id="conDbFinale">
+        -- Aggiorna Id_ATECO
+        UPDATE dbo.Enti
+        SET Id_ATECO = (SELECT Id_ATECO FROM dbo.Codici_ATECO WHERE Codice_ATECO = Enti.Codice_ATECO)
+        WHERE Id_ATECO IS NULL;
+
+        -- Aggiorna Id_Forma_Giuridica
+        UPDATE dbo.Enti
+        SET Id_Forma_Giuridica = (SELECT Id_Forma_Giuridica FROM dbo.Forme_Giuridiche WHERE Codice_Forma_Giuridica = Enti.Codice_Forma_Giuridica)
+        WHERE Id_Forma_Giuridica IS NULL;
+
+        -- Aggiorna Id_Comune
+        UPDATE dbo.Enti
+        SET Id_Comune = (SELECT Id_Comune FROM dbo.Comuni WHERE Dizione_Comune = Enti.Dizione_Comune)
+        WHERE Id_Comune IS NULL;
+
+        -- Aggiorna Id_Provincia
+        UPDATE dbo.Enti
+        SET Id_Provincia = (SELECT Id_Provincia FROM dbo.Province WHERE Codice_Provincia = Enti.Codice_Provincia)
+        WHERE Id_Provincia IS NULL;
+
+        -- Aggiorna Id_Regione
+        UPDATE dbo.Enti
+        SET Id_Regione = (SELECT Id_Regione FROM dbo.Regioni WHERE Codice_Regione = Enti.Codice_Regione)
+        WHERE Id_Regione IS NULL;
+
+        -- Aggiorna Id_Zona
+        UPDATE dbo.Enti
+        SET Id_Zona = (SELECT Id_Zona FROM dbo.Zone WHERE Codice_Zona = Enti.Codice_Zona)
+        WHERE Id_Zona IS NULL;
+
+        -- Aggiorna Id_DT
+        UPDATE dbo.Enti
+        SET Id_DT = (SELECT Id_DT FROM dbo.Tipologie_DT WHERE Id_Tipologia_DT = Enti.Id_Tipologia_DT)
+        WHERE Id_DT IS NULL;
+
+        -- Aggiorna Id_SIOPE
+        UPDATE dbo.Enti
+        SET Id_SIOPE = (SELECT Id_SIOPE FROM dbo.Tipologie_SIOPE WHERE Id_Tipologia_SIOPE = Enti.Id_Tipologia_SIOPE)
+        WHERE Id_SIOPE IS NULL;
+
+        -- Aggiorna Id_IPA
+        UPDATE dbo.Enti
+        SET Id_IPA = (SELECT Id_IPA FROM dbo.Tipologie_IPA WHERE Id_Categoria_IPA = Enti.Id_Categoria_IPA)
+        WHERE Id_IPA IS NULL;
+
+        -- Aggiorna Id_MIUR
+        UPDATE dbo.Enti
+        SET Id_MIUR = (SELECT Id_MIUR FROM dbo.Tipologie_MIUR WHERE Id_Tipologia_MIUR = Enti.Id_Tipologia_MIUR)
+        WHERE Id_MIUR IS NULL;
+
+        -- Aggiorna Id_ISTAT
+        UPDATE dbo.Enti
+        SET Id_ISTAT = (SELECT Id_ISTAT FROM dbo.Tipologie_ISTAT WHERE Id_Tipologia_ISTAT_S13 = Enti.Id_Tipologia_ISTAT_S13)
+        WHERE Id_ISTAT IS NULL;
+
+        -- Aggiorna Id_DLGS
+        UPDATE dbo.Enti
+        SET Id_DLGS = (SELECT Id_DLGS FROM dbo.Tipologie_DLGS_118_2011 WHERE Id_Tipologia_DLGS_118_2011 = Enti.Id_Tipologia_DLGS_118_2011)
+        WHERE Id_DLGS IS NULL;
+    </script>
+</etl>
